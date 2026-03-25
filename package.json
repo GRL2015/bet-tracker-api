@@ -33,7 +33,7 @@
 		"deploy": "wrangler deploy",
 		"dev": "pnpm seedLocalDb && wrangler dev",
 		"predeploy": "wrangler d1 migrations apply DB --remote",
-		"schema": "npx chanfana",
+		"schema": "npx chanfana -o openapi.json",
 		"seedLocalDb": "wrangler d1 migrations apply DB --local",
 		"test": "wrangler deploy --dry-run && npx vitest run --config tests/vitest.config.mts"
 	}
