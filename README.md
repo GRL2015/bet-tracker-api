@@ -70,3 +70,37 @@ Test files are located in the `tests/` directory, with examples demonstrating ho
 2. Each endpoint has its own file in `src/endpoints/`.
 3. Integration tests are located in the `tests/` directory.
 4. For more information read the [chanfana documentation](https://chanfana.com/), [Hono documentation](https://hono.dev/docs), and [Vitest documentation](https://vitest.dev/guide/).
+
+## Creating a ChatGPT Custom GPT
+
+This API is ready to be used as an **Action** inside a [ChatGPT custom GPT](https://platform.openai.com/docs/actions). Follow these steps:
+
+### Prerequisites
+
+Deploy the API first (see [Setup Steps](#setup-steps) above) and note your Worker URL (e.g. `https://bet-tracker-api.your-subdomain.workers.dev`).
+
+### Steps
+
+1. **Update the server URL** — Open `src/index.ts` and replace the placeholder in the `servers` array with your actual Worker URL, then regenerate the schema:
+   ```bash
+   npm run schema
+   ```
+2. **Open ChatGPT** — Go to [https://chatgpt.com/gpts/editor](https://chatgpt.com/gpts/editor) and create a new GPT.
+3. **Set the GPT instructions** — Copy the contents of [`gpt-instructions.md`](./gpt-instructions.md) into the **Instructions** field.
+4. **Add the API Action** — In the **Configure** tab, scroll to **Actions** → **Create new action**. Click **Import from URL** and point it at your Worker's live schema endpoint:
+   ```
+   https://bet-tracker-api.your-subdomain.workers.dev/openapi.json
+   ```
+   Or paste the contents of the [`openapi.json`](./openapi.json) file directly into the **Schema** editor.
+5. **Set Authentication** — If your API is publicly accessible, select **None**. Otherwise, configure the appropriate auth method.
+6. **Save and test** — Click **Save** and try asking the GPT to list data sources or compute a betting score.
+
+### Regenerating the OpenAPI Schema
+
+Whenever you change endpoints, regenerate the schema file:
+
+```bash
+npm run schema
+```
+
+This outputs `openapi.json` in the project root, ready to upload to ChatGPT.

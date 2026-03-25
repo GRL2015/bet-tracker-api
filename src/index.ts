@@ -43,6 +43,13 @@ const openapi = fromHono(app, {
 			description:
 				"Sports betting intelligence API that aggregates data from multiple ranked sources (odds APIs, stats APIs, social media verified creators) and computes accuracy-weighted composite scores for betting decisions.",
 		},
+		servers: [
+			{
+				url: "https://bet-tracker-api.{your-subdomain}.workers.dev",
+				description:
+					"Production — replace {your-subdomain} with your Cloudflare Workers subdomain",
+			},
+		],
 	},
 });
 

@@ -1,0 +1,3652 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bet Tracker API",
+    "version": "2.0.0",
+    "description": "Sports betting intelligence API that aggregates data from multiple ranked sources (odds APIs, stats APIs, social media verified creators) and computes accuracy-weighted composite scores for betting decisions."
+  },
+  "servers": [
+    {
+      "url": "https://bet-tracker-api.{your-subdomain}.workers.dev",
+      "description": "Production — replace {your-subdomain} with your Cloudflare Workers subdomain"
+    }
+  ],
+  "components": {
+    "schemas": {},
+    "parameters": {}
+  },
+  "paths": {
+    "/tasks": {
+      "get": {
+        "operationId": "get_TaskList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by name, slug, description"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "completed": {
+                            "type": "boolean"
+                          },
+                          "due_date": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "slug",
+                          "description",
+                          "completed",
+                          "due_date"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_TaskCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "completed": {
+                    "type": "boolean"
+                  },
+                  "due_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "name",
+                  "slug",
+                  "description",
+                  "completed",
+                  "due_date"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "completed": {
+                          "type": "boolean"
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "slug",
+                        "description",
+                        "completed",
+                        "due_date"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "operationId": "get_TaskRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "completed": {
+                          "type": "boolean"
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "slug",
+                        "description",
+                        "completed",
+                        "due_date"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_TaskUpdate",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "completed": {
+                    "type": "boolean"
+                  },
+                  "due_date": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "name",
+                  "slug",
+                  "description",
+                  "completed",
+                  "due_date"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "completed": {
+                          "type": "boolean"
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "slug",
+                        "description",
+                        "completed",
+                        "due_date"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_TaskDelete",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Object if it was successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "completed": {
+                          "type": "boolean"
+                        },
+                        "due_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "slug",
+                        "description",
+                        "completed",
+                        "due_date"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-sources": {
+      "get": {
+        "operationId": "get_DataSourceList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by name, type, description"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "accuracy_rank": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "weight": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "is_active": {
+                            "type": "boolean"
+                          },
+                          "is_verified": {
+                            "type": "boolean"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "type",
+                          "url",
+                          "description",
+                          "accuracy_rank",
+                          "weight",
+                          "is_active",
+                          "is_verified",
+                          "created_at",
+                          "updated_at"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_DataSourceCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "accuracy_rank": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "is_active": {
+                    "type": "boolean"
+                  },
+                  "is_verified": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type",
+                  "url",
+                  "description",
+                  "accuracy_rank",
+                  "weight",
+                  "is_active",
+                  "is_verified"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "accuracy_rank": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "weight": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "url",
+                        "description",
+                        "accuracy_rank",
+                        "weight",
+                        "is_active",
+                        "is_verified",
+                        "created_at",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-sources/{id}": {
+      "get": {
+        "operationId": "get_DataSourceRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "accuracy_rank": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "weight": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "url",
+                        "description",
+                        "accuracy_rank",
+                        "weight",
+                        "is_active",
+                        "is_verified",
+                        "created_at",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_DataSourceUpdate",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "accuracy_rank": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "is_active": {
+                    "type": "boolean"
+                  },
+                  "is_verified": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "type",
+                  "url",
+                  "description",
+                  "accuracy_rank",
+                  "weight",
+                  "is_active",
+                  "is_verified"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "accuracy_rank": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "weight": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "url",
+                        "description",
+                        "accuracy_rank",
+                        "weight",
+                        "is_active",
+                        "is_verified",
+                        "created_at",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_DataSourceDelete",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Object if it was successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "accuracy_rank": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 100
+                        },
+                        "weight": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "is_active": {
+                          "type": "boolean"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "type",
+                        "url",
+                        "description",
+                        "accuracy_rank",
+                        "weight",
+                        "is_active",
+                        "is_verified",
+                        "created_at",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/social-media-picks": {
+      "get": {
+        "operationId": "get_SocialMediaPickList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by author_handle, platform, sport, event_description, content"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "source_id": {
+                            "type": "integer"
+                          },
+                          "platform": {
+                            "type": "string"
+                          },
+                          "author_handle": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "pick_type": {
+                            "type": "string"
+                          },
+                          "sport": {
+                            "type": "string"
+                          },
+                          "event_description": {
+                            "type": "string"
+                          },
+                          "predicted_outcome": {
+                            "type": "string"
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "posted_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "is_verified": {
+                            "type": "boolean"
+                          },
+                          "outcome_correct": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
+                          "resolved_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "format": "date-time"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "source_id",
+                          "platform",
+                          "author_handle",
+                          "content",
+                          "pick_type",
+                          "sport",
+                          "event_description",
+                          "predicted_outcome",
+                          "confidence",
+                          "posted_at",
+                          "is_verified",
+                          "outcome_correct",
+                          "resolved_at",
+                          "created_at"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_SocialMediaPickCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "integer"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "author_handle": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "pick_type": {
+                    "type": "string"
+                  },
+                  "sport": {
+                    "type": "string"
+                  },
+                  "event_description": {
+                    "type": "string"
+                  },
+                  "predicted_outcome": {
+                    "type": "string"
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "posted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "is_verified": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "platform",
+                  "author_handle",
+                  "content",
+                  "pick_type",
+                  "sport",
+                  "event_description",
+                  "predicted_outcome",
+                  "confidence",
+                  "posted_at",
+                  "is_verified"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "platform": {
+                          "type": "string"
+                        },
+                        "author_handle": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "pick_type": {
+                          "type": "string"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "predicted_outcome": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "posted_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "outcome_correct": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "resolved_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "platform",
+                        "author_handle",
+                        "content",
+                        "pick_type",
+                        "sport",
+                        "event_description",
+                        "predicted_outcome",
+                        "confidence",
+                        "posted_at",
+                        "is_verified",
+                        "outcome_correct",
+                        "resolved_at",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/social-media-picks/{id}": {
+      "get": {
+        "operationId": "get_SocialMediaPickRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "platform": {
+                          "type": "string"
+                        },
+                        "author_handle": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "pick_type": {
+                          "type": "string"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "predicted_outcome": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "posted_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "outcome_correct": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "resolved_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "platform",
+                        "author_handle",
+                        "content",
+                        "pick_type",
+                        "sport",
+                        "event_description",
+                        "predicted_outcome",
+                        "confidence",
+                        "posted_at",
+                        "is_verified",
+                        "outcome_correct",
+                        "resolved_at",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_SocialMediaPickUpdate",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "integer"
+                  },
+                  "platform": {
+                    "type": "string"
+                  },
+                  "author_handle": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "pick_type": {
+                    "type": "string"
+                  },
+                  "sport": {
+                    "type": "string"
+                  },
+                  "event_description": {
+                    "type": "string"
+                  },
+                  "predicted_outcome": {
+                    "type": "string"
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "posted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "is_verified": {
+                    "type": "boolean"
+                  },
+                  "outcome_correct": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "resolved_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "platform",
+                  "author_handle",
+                  "content",
+                  "pick_type",
+                  "sport",
+                  "event_description",
+                  "predicted_outcome",
+                  "confidence",
+                  "posted_at",
+                  "is_verified",
+                  "outcome_correct",
+                  "resolved_at"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "platform": {
+                          "type": "string"
+                        },
+                        "author_handle": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "pick_type": {
+                          "type": "string"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "predicted_outcome": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "posted_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "outcome_correct": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "resolved_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "platform",
+                        "author_handle",
+                        "content",
+                        "pick_type",
+                        "sport",
+                        "event_description",
+                        "predicted_outcome",
+                        "confidence",
+                        "posted_at",
+                        "is_verified",
+                        "outcome_correct",
+                        "resolved_at",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_SocialMediaPickDelete",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Object if it was successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "platform": {
+                          "type": "string"
+                        },
+                        "author_handle": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "pick_type": {
+                          "type": "string"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "predicted_outcome": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "posted_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "is_verified": {
+                          "type": "boolean"
+                        },
+                        "outcome_correct": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ]
+                        },
+                        "resolved_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "platform",
+                        "author_handle",
+                        "content",
+                        "pick_type",
+                        "sport",
+                        "event_description",
+                        "predicted_outcome",
+                        "confidence",
+                        "posted_at",
+                        "is_verified",
+                        "outcome_correct",
+                        "resolved_at",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/source-accuracy-logs": {
+      "get": {
+        "operationId": "get_SourceAccuracyLogList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by prediction, actual_outcome, sport, event_description"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "source_id": {
+                            "type": "integer"
+                          },
+                          "prediction": {
+                            "type": "string"
+                          },
+                          "actual_outcome": {
+                            "type": "string"
+                          },
+                          "was_correct": {
+                            "type": "boolean"
+                          },
+                          "sport": {
+                            "type": "string"
+                          },
+                          "event_description": {
+                            "type": "string"
+                          },
+                          "logged_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "source_id",
+                          "prediction",
+                          "actual_outcome",
+                          "was_correct",
+                          "sport",
+                          "event_description",
+                          "logged_at"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_SourceAccuracyLogCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "type": "integer"
+                  },
+                  "prediction": {
+                    "type": "string"
+                  },
+                  "actual_outcome": {
+                    "type": "string"
+                  },
+                  "was_correct": {
+                    "type": "boolean"
+                  },
+                  "sport": {
+                    "type": "string"
+                  },
+                  "event_description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "prediction",
+                  "actual_outcome",
+                  "was_correct",
+                  "sport",
+                  "event_description"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "prediction": {
+                          "type": "string"
+                        },
+                        "actual_outcome": {
+                          "type": "string"
+                        },
+                        "was_correct": {
+                          "type": "boolean"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "logged_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "prediction",
+                        "actual_outcome",
+                        "was_correct",
+                        "sport",
+                        "event_description",
+                        "logged_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7001
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Input Validation Error"
+                          },
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "example": "body"
+                            }
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message",
+                          "path"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/source-accuracy-logs/{id}": {
+      "get": {
+        "operationId": "get_SourceAccuracyLogRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "prediction": {
+                          "type": "string"
+                        },
+                        "actual_outcome": {
+                          "type": "string"
+                        },
+                        "was_correct": {
+                          "type": "boolean"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "logged_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "source_id",
+                        "prediction",
+                        "actual_outcome",
+                        "was_correct",
+                        "sport",
+                        "event_description",
+                        "logged_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/betting-analyses": {
+      "get": {
+        "operationId": "get_BettingAnalysisList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by sport, event_description, recommendation"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "sport": {
+                            "type": "string"
+                          },
+                          "event_description": {
+                            "type": "string"
+                          },
+                          "event_date": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "final_score": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "recommendation": {
+                            "type": "string"
+                          },
+                          "confidence": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "contributing_sources_count": {
+                            "type": "integer"
+                          },
+                          "breakdown": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "sport",
+                          "event_description",
+                          "event_date",
+                          "final_score",
+                          "recommendation",
+                          "confidence",
+                          "contributing_sources_count",
+                          "breakdown",
+                          "notes",
+                          "created_at"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/betting-analyses/compute": {
+      "post": {
+        "tags": [
+          "Betting Analyses"
+        ],
+        "summary": "Compute a composite betting score from multiple source signals using accuracy-weighted ranking",
+        "operationId": "compute-betting-score",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sport": {
+                    "type": "string",
+                    "description": "Sport type (e.g. nfl, nba, mlb)"
+                  },
+                  "event_description": {
+                    "type": "string",
+                    "description": "Description of the betting event"
+                  },
+                  "event_date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Date/time of the event"
+                  },
+                  "contributions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_id": {
+                          "type": "integer",
+                          "description": "ID of the data source"
+                        },
+                        "signal_value": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100,
+                          "description": "Signal value from this source (-100 to 100)"
+                        },
+                        "raw_data": {
+                          "type": "string",
+                          "default": "{}",
+                          "description": "Raw JSON data from the source"
+                        }
+                      },
+                      "required": [
+                        "source_id",
+                        "signal_value"
+                      ]
+                    },
+                    "minItems": 1,
+                    "description": "Array of source signal contributions"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "required": [
+                  "sport",
+                  "event_description",
+                  "event_date",
+                  "contributions"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the computed composite score and recommendation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "analysis_id": {
+                          "type": "integer"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "event_date": {
+                          "type": "string"
+                        },
+                        "final_score": {
+                          "type": "number"
+                        },
+                        "recommendation": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number"
+                        },
+                        "contributing_sources_count": {
+                          "type": "integer"
+                        },
+                        "breakdown": {
+                          "type": "object",
+                          "properties": {
+                            "contributions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "source_id": {
+                                    "type": "integer"
+                                  },
+                                  "source_name": {
+                                    "type": "string"
+                                  },
+                                  "accuracy_rank": {
+                                    "type": "integer"
+                                  },
+                                  "source_weight": {
+                                    "type": "number"
+                                  },
+                                  "effective_weight": {
+                                    "type": "number"
+                                  },
+                                  "signal_value": {
+                                    "type": "number"
+                                  },
+                                  "weighted_score": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "source_id",
+                                  "source_name",
+                                  "accuracy_rank",
+                                  "source_weight",
+                                  "effective_weight",
+                                  "signal_value",
+                                  "weighted_score"
+                                ]
+                              }
+                            },
+                            "total_effective_weight": {
+                              "type": "number"
+                            },
+                            "algorithm": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "contributions",
+                            "total_effective_weight",
+                            "algorithm"
+                          ]
+                        },
+                        "notes": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "analysis_id",
+                        "sport",
+                        "event_description",
+                        "event_date",
+                        "final_score",
+                        "recommendation",
+                        "confidence",
+                        "contributing_sources_count",
+                        "breakdown",
+                        "notes"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/betting-analyses/{id}": {
+      "get": {
+        "operationId": "get_BettingAnalysisRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "event_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "final_score": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100
+                        },
+                        "recommendation": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "contributing_sources_count": {
+                          "type": "integer"
+                        },
+                        "breakdown": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "sport",
+                        "event_description",
+                        "event_date",
+                        "final_score",
+                        "recommendation",
+                        "confidence",
+                        "contributing_sources_count",
+                        "breakdown",
+                        "notes",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_BettingAnalysisDelete",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Object if it was successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "sport": {
+                          "type": "string"
+                        },
+                        "event_description": {
+                          "type": "string"
+                        },
+                        "event_date": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "final_score": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100
+                        },
+                        "recommendation": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "contributing_sources_count": {
+                          "type": "integer"
+                        },
+                        "breakdown": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "sport",
+                        "event_description",
+                        "event_date",
+                        "final_score",
+                        "recommendation",
+                        "confidence",
+                        "contributing_sources_count",
+                        "breakdown",
+                        "notes",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis-source-contributions": {
+      "get": {
+        "operationId": "get_AnalysisSourceContributionList",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "per_page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Search by raw_data"
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "analysis_id": {
+                            "type": "integer"
+                          },
+                          "source_id": {
+                            "type": "integer"
+                          },
+                          "signal_value": {
+                            "type": "number",
+                            "minimum": -100,
+                            "maximum": 100
+                          },
+                          "weight_applied": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "weighted_score": {
+                            "type": "number"
+                          },
+                          "raw_data": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "analysis_id",
+                          "source_id",
+                          "signal_value",
+                          "weight_applied",
+                          "weighted_score",
+                          "raw_data",
+                          "created_at"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis-source-contributions/{id}": {
+      "get": {
+        "operationId": "get_AnalysisSourceContributionRead",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a single object if found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "analysis_id": {
+                          "type": "integer"
+                        },
+                        "source_id": {
+                          "type": "integer"
+                        },
+                        "signal_value": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100
+                        },
+                        "weight_applied": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "weighted_score": {
+                          "type": "number"
+                        },
+                        "raw_data": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "analysis_id",
+                        "source_id",
+                        "signal_value",
+                        "weight_applied",
+                        "weighted_score",
+                        "raw_data",
+                        "created_at"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "number",
+                            "example": 7002
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Not Found"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "message"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "errors"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dummy/{slug}": {
+      "post": {
+        "tags": [
+          "Dummy"
+        ],
+        "summary": "this endpoint is an example",
+        "operationId": "example-endpoint",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "slug",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the log details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "msg": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "msg",
+                        "slug",
+                        "name"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "result"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}
