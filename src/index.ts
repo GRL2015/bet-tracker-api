@@ -1,6 +1,11 @@
 import { ApiException, fromHono } from "chanfana";
 import { Hono } from "hono";
 import { tasksRouter } from "./endpoints/tasks/router";
+import { dataSourcesRouter } from "./endpoints/dataSources/router";
+import { socialMediaPicksRouter } from "./endpoints/socialMediaPicks/router";
+import { sourceAccuracyLogsRouter } from "./endpoints/sourceAccuracyLogs/router";
+import { bettingAnalysesRouter } from "./endpoints/bettingAnalyses/router";
+import { analysisSourceContributionsRouter } from "./endpoints/analysisSourceContributions/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
 
@@ -33,15 +38,31 @@ const openapi = fromHono(app, {
 	docs_url: "/",
 	schema: {
 		info: {
-			title: "My Awesome API",
+			title: "Bet Tracker API",
 			version: "2.0.0",
-			description: "This is the documentation for my awesome API.",
+			description:
+				"Sports betting intelligence API that aggregates data from multiple ranked sources (odds APIs, stats APIs, social media verified creators) and computes accuracy-weighted composite scores for betting decisions.",
 		},
 	},
 });
 
 // Register Tasks Sub router
 openapi.route("/tasks", tasksRouter);
+
+// Register Data Sources router
+openapi.route("/data-sources", dataSourcesRouter);
+
+// Register Social Media Picks router
+openapi.route("/social-media-picks", socialMediaPicksRouter);
+
+// Register Source Accuracy Logs router
+openapi.route("/source-accuracy-logs", sourceAccuracyLogsRouter);
+
+// Register Betting Analyses router (includes /compute endpoint)
+openapi.route("/betting-analyses", bettingAnalysesRouter);
+
+// Register Analysis Source Contributions router
+openapi.route("/analysis-source-contributions", analysisSourceContributionsRouter);
 
 // Register other endpoints
 openapi.post("/dummy/:slug", DummyEndpoint);
