@@ -1,0 +1,16 @@
+{
+	"compatibility_date": "2025-10-08",
+	"main": "src/index.ts",
+	"name": "bet-tracker-api",
+	"upload_source_maps": true,
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "bet_tracker_db",
+			"database_id": "4dbf68e9-e6cb-420c-aead-f86616485208"
+		}
+	]
+}
