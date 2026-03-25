@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS analysis_source_contributions (
     weighted_score REAL NOT NULL,
     raw_data TEXT NOT NULL DEFAULT '{}',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (analysis_id) REFERENCES betting_analyses(id),
+    FOREIGN KEY (analysis_id) REFERENCES betting_analyses(id) ON DELETE CASCADE,
     FOREIGN KEY (source_id) REFERENCES data_sources(id)
 );
